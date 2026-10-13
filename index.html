@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Сериалы">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>трекер сериалов</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f5f5f7;font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;min-height:100vh;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));padding-bottom:max(1rem,env(safe-area-inset-bottom));color:#1a1a2e;overscroll-behavior:none}
+.app{max-width:1000px;width:100%}
+h1{font-size:1.6rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+h1 span{background:#7c3aed;font-size:.8rem;padding:.15rem .6rem;border-radius:40px;color:#fff}
+.add-form{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;background:#fff;padding:.8rem;border-radius:14px;border:1px solid #e4e4eb}
+.add-form input{flex:1 1 160px;background:#f9f9fb;border:1px solid #e4e4eb;padding:.7rem 1rem;border-radius:10px;font-size:.9rem;outline:none;min-width:0}
+.add-form input:focus{border-color:#7c3aed;background:#fff}
+.add-form button{background:#7c3aed;border:none;padding:.7rem 1.4rem;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;font-size:.9rem}
+.add-form button:hover{background:#6d28d9}
+.add-form button:active{transform:scale(.97)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));padding-bottom:max(1rem,env(safe-area-inset-bottom))}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.2rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:1.1rem;margin-bottom:1rem}
+.season-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;background:#f9f9fb;padding:.5rem .7rem;border-radius:10px;border:1px solid #e4e4eb}
+.season-row .season-label{font-size:.8rem;font-weight:600;min-width:65px;color:#4a4a5a}
+.season-row input{flex:1;background:#fff;border:1px solid #e4e4eb;padding:.5rem .7rem;border-radius:8px;font-size:.85rem;outline:none;min-width:0}
+.season-row input:focus{border-color:#7c3aed}
+.season-row button{background:#fee2e2;border:none;border-radius:8px;padding:.4rem .65rem;font-size:.85rem;color:#b91c1c;cursor:pointer}
+.modal-actions{display:flex;gap:.5rem;margin-top:1rem;justify-content:flex-end}
+.modal-actions button{padding:.6rem 1.1rem;border-radius:10px;font-weight:600;font-size:.85rem;cursor:pointer;border:none}
+.btn-secondary{background:#f5f5f7;color:#4a4a5a;border:1px solid #e4e4eb !important}
+.btn-primary{background:#7c3aed;color:#fff}
+.btn-add-season{background:#ede9fe;color:#6d28d9;border:none;padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;margin-bottom:1rem}
+.stats{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.stat-card{background:#fff;padding:.5rem .9rem;border-radius:10px;border:1px solid #e4e4eb;display:flex;align-items:center;gap:.4rem}
+.stat-card .num{font-size:1rem;font-weight:700}
+.stat-card .label{font-size:.7rem;color:#8a8a9e;text-transform:uppercase}
+.series-grid{display:flex;flex-direction:column;gap:.5rem}
+.series-card{background:#fff;border:1px solid #e4e4eb;border-radius:12px;padding:.7rem .9rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.series-title{flex:2 1 160px;min-width:0;font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.series-title .badge{display:inline-block;padding:.1rem .5rem;border-radius:40px;font-size:.6rem;font-weight:600;text-transform:uppercase;margin-left:.4rem;vertical-align:middle}
+.badge.watching{background:#ede9fe;color:#6d28d9}
+.badge.completed{background:#d1fae5;color:#047857}
+.badge.planned{background:#e2e8f0;color:#64748b}
+.badge.dropped{background:#fee2e2;color:#b91c1c}
+.series-meta{flex:0 1 auto;font-size:.75rem;color:#8a8a9e;white-space:nowrap}
+.series-meta .ep{color:#7c3aed;font-weight:500}
+.progress-container{flex:1 1 120px;min-width:90px}
+.progress-bar-bg{background:#f0f0f5;height:5px;border-radius:10px;overflow:hidden;margin-bottom:.15rem}
+.progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:10px}
+.progress-text{font-size:.65rem;color:#8a8a9e;text-align:right}
+.actions{display:flex;gap:.3rem;flex-shrink:0}
+.actions button{background:#f5f5f7;border:1px solid #e4e4eb;border-radius:8px;padding:.35rem .65rem;font-size:.72rem;color:#4a4a5a;cursor:pointer}
+.actions button.danger:hover{background:#fee2e2;color:#b91c1c}
+.empty-state{text-align:center;padding:3rem 1rem;color:#9a9aae;border:1px dashed #d4d4dc;border-radius:14px}
+.empty-state small{display:block;margin-top:.4rem;font-size:.8rem}
+.seasons-panel{padding:.9rem;background:#fafafc;border-top:1px solid #e4e4eb;width:100%;border-radius:8px;margin-top:.4rem}
+.season-block{margin-bottom:.9rem}
+.season-block:last-child{margin-bottom:0}
+.season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+.season-header .season-name{font-size:.8rem;font-weight:600;color:#4a4a5a}
+.season-header .season-progress{font-size:.72rem;color:#8a8a9e}
+.season-header .season-progress .done{color:#047857;font-weight:600}
+.episodes-grid{display:flex;flex-wrap:wrap;gap:.3rem}
+.episode-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e4e4eb;background:#fff;font-size:.72rem;font-weight:500;color:#8a8a9e;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.episode-btn.watched{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.install-banner{background:#fff;border:1px solid #e4e4eb;border-radius:12px;padding:.8rem 1rem;margin-bottom:1rem;display:none;align-items:center;gap:.7rem;justify-content:space-between;flex-wrap:wrap}
+.install-banner.show{display:flex}
+.install-banner .txt{font-size:.85rem;color:#4a4a5a;flex:1 1 200px}
+.install-banner button{background:#7c3aed;border:none;padding:.55rem 1.1rem;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;font-size:.85rem}
+@media(max-width:700px){
+h1{font-size:1.4rem}
+.series-card{padding:.7rem}
+.series-title{flex:1 1 100%}
+.actions{width:100%;justify-content:flex-start}
+.progress-container{flex:1 1 100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>📺 трекер сериалов <span id="totalCount">0</span></h1>
+<div class="install-banner" id="installBanner">
+<div class="txt">Установите приложение на устройство для быстрого доступа</div>
+<button id="installBtn">Установить</button>
+</div>
+<div class="add-form">
+<input id="titleInput" placeholder="Название сериала" autocomplete="off">
+<button id="addBtn">+ добавить</button>
+</div>
+<div class="stats">
+<div class="stat-card"><span class="num" id="statWatching">0</span><span class="label">смотрю</span></div>
+<div class="stat-card"><span class="num" id="statCompleted">0</span><span class="label">завершено</span></div>
+<div class="stat-card"><span class="num" id="statPlanned">0</span><span class="label">в планах</span></div>
+<div class="stat-card"><span class="num" id="statDropped">0</span><span class="label">брошено</span></div>
+</div>
+<div class="series-grid" id="seriesGrid"></div>
+</div>
+
+<div class="modal-overlay" id="seasonsModal">
+<div class="modal">
+<h2 id="modalTitle">Настройка сезонов</h2>
+<div id="seasonsList"></div>
+<button class="btn-add-season" id="addSeasonBtn">+ добавить сезон</button>
+<div class="modal-actions">
+<button class="btn-secondary" id="cancelSeasonsBtn">отмена</button>
+<button class="btn-primary" id="saveSeasonsBtn">сохранить</button>
+</div>
+</div>
+</div>
+
+<script>
+const KEY='series_tracker_v6',grid=document.getElementById('seriesGrid'),titleInput=document.getElementById('titleInput'),addBtn=document.getElementById('addBtn'),totalCount=document.getElementById('totalCount'),statWatching=document.getElementById('statWatching'),statCompleted=document.getElementById('statCompleted'),statPlanned=document.getElementById('statPlanned'),statDropped=document.getElementById('statDropped');
+const modal=document.getElementById('seasonsModal'),modalTitle=document.getElementById('modalTitle'),seasonsList=document.getElementById('seasonsList'),addSeasonBtn=document.getElementById('addSeasonBtn'),cancelSeasonsBtn=document.getElementById('cancelSeasonsBtn'),saveSeasonsBtn=document.getElementById('saveSeasonsBtn');
+const installBanner=document.getElementById('installBanner'),installBtn=document.getElementById('installBtn');
+const STATUSES={watching:{label:'смотрю',class:'watching'},completed:{label:'завершён',class:'completed'},planned:{label:'в планах',class:'planned'},dropped:{label:'брошен',class:'dropped'}};
+let series=[],expandedId=null,editingId=null,tempSeasons=[],deferredPrompt=null;
+
+const load=()=>{try{const r=localStorage.getItem(KEY);series=r?JSON.parse(r):[{id:'1',title:'Во все тяжкие',seasons:[{episodes:7,watched:7},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:16,watched:16}],status:'completed'},{id:'2',title:'Очень странные дела',seasons:[{episodes:8,watched:8},{episodes:9,watched:9},{episodes:8,watched:8},{episodes:9,watched:3}],status:'watching'},{id:'3',title:'Дом Дракона',seasons:[{episodes:10,watched:0},{episodes:8,watched:0}],status:'planned'}]}catch(e){series=[]}};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(series));
+const genId=()=>Date.now()+'-'+Math.random().toString(36).slice(2,8);
+const escapeHtml=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
+const totalEp=s=>s.seasons.reduce((a,x)=>a+x.episodes,0);
+const totalWatched=s=>s.seasons.reduce((a,x)=>a+x.watched,0);
+const autoStatus=s=>{const t=totalEp(s),w=totalWatched(s);if(w>=t&&t>0)return'completed';if(w>0)return'watching';return s.status==='dropped'?'dropped':'planned'};
+
+const updateStats=()=>{const c={watching:0,completed:0,planned:0,dropped:0};series.forEach(s=>{const st=autoStatus(s);if(c[st]!==undefined)c[st]++});statWatching.textContent=c.watching;statCompleted.textContent=c.completed;statPlanned.textContent=c.planned;statDropped.textContent=c.dropped;totalCount.textContent=series.length};
+
+const renderSeasons=(s)=>{
+let html='';
+s.seasons.forEach((sea,si)=>{
+let eps='';
+for(let i=1;i<=sea.episodes;i++){eps+=`<button class="episode-btn ${i<=sea.watched?'watched':''}" data-season="${si}" data-ep="${i}">${i}</button>`}
+html+=`<div class="season-block"><div class="season-header"><span class="season-name">Сезон ${si+1}</span><span class="season-progress"><span class="done">${sea.watched}</span> / ${sea.episodes}</span></div><div class="episodes-grid">${eps}</div></div>`});
+return html};
+
+const render=()=>{
+if(!series.length){grid.innerHTML='<div class="empty-state">нет сериалов<small>добавь первый сериал выше</small></div>';updateStats();return}
+grid.innerHTML=series.map(s=>{
+const total=totalEp(s),watched=totalWatched(s),percent=total?Math.round(watched/total*100):0,st=STATUSES[autoStatus(s)]||STATUSES.planned,sw=s.seasons.length===1?'сезон':s.seasons.length<5?'сезона':'сезонов',exp=expandedId===s.id;
+return `<div class="series-card" data-id="${s.id}"><div class="series-title" data-action="expand">${escapeHtml(s.title)}<span class="badge ${st.class}">${st.label}</span></div><div class="series-meta">${s.seasons.length} ${sw} · <span class="ep">${total} эп.</span></div><div class="progress-container"><div class="progress-bar-bg"><div class="progress-fill" style="width:${percent}%"></div></div><div class="progress-text">${watched}/${total} · ${percent}%</div></div><div class="actions"><button data-action="config">сезоны</button><button data-action="status">статус</button><button class="danger" data-action="delete">✕</button></div>${exp?`<div class="seasons-panel">${renderSeasons(s)}</div>`:''}</div>`}).join('');
+updateStats()};
+
+const openModal=(id)=>{editingId=id;const s=series.find(x=>x.id===id);modalTitle.textContent=`Сезоны: ${s.title}`;tempSeasons=s.seasons.map(x=>({episodes:x.episodes,watched:x.watched}));renderModalSeasons();modal.classList.add('active')};
+const renderModalSeasons=()=>{seasonsList.innerHTML=tempSeasons.map((sea,i)=>`<div class="season-row"><span class="season-label">Сезон ${i+1}</span><input type="number" min="1" value="${sea.episodes}" data-idx="${i}" class="season-ep-input" placeholder="Серий"><button data-idx="${i}" class="remove-season">✕</button></div>`).join('')};
+
+addSeasonBtn.addEventListener('click',()=>{tempSeasons.push({episodes:10,watched:0});renderModalSeasons()});
+seasonsList.addEventListener('input',e=>{if(e.target.classList.contains('season-ep-input')){const i=+e.target.dataset.idx;const v=Math.max(1,parseInt(e.target.value)||1);tempSeasons[i].episodes=v;if(tempSeasons[i].watched>v)tempSeasons[i].watched=v}});
+seasonsList.addEventListener('click',e=>{if(e.target.classList.contains('remove-season')){if(tempSeasons.length<=1)return;tempSeasons.splice(+e.target.dataset.idx,1);renderModalSeasons()}});
+cancelSeasonsBtn.addEventListener('click',()=>{modal.classList.remove('active');editingId=null});
+saveSeasonsBtn.addEventListener('click',()=>{const s=series.find(x=>x.id===editingId);if(!s)return;s.seasons=tempSeasons.map(x=>({episodes:x.episodes,watched:Math.min(x.watched,x.episodes)}));save();modal.classList.remove('active');editingId=null;render()});
+
+const addSeries=()=>{const t=titleInput.value.trim();if(!t)return;const id=genId();series.push({id,title:t,seasons:[{episodes:10,watched:0}],status:'planned'});titleInput.value='';save();render();openModal(id)};
+
+const handleClick=e=>{
+const epBtn=e.target.closest('.episode-btn');
+if(epBtn){const card=epBtn.closest('.series-card');const s=series.find(x=>x.id===card.dataset.id);const si=+epBtn.dataset.season,ep=+epBtn.dataset.ep;const sea=s.seasons[si];if(ep===sea.watched+1)sea.watched=ep;else if(ep<=sea.watched)sea.watched=ep-1;else sea.watched=ep;s.status=autoStatus(s);save();render();return}
+const title=e.target.closest('.series-title');
+if(title&&title.dataset.action==='expand'){const card=title.closest('.series-card');const id=card.dataset.id;expandedId=expandedId===id?null:id;render();return}
+const btn=e.target.closest('button');if(!btn)return;
+const card=btn.closest('.series-card');if(!card)return;
+const s=series.find(x=>x.id===card.dataset.id);if(!s)return;
+const a=btn.dataset.action;
+if(a==='config'){openModal(s.id)}
+else if(a==='status'){const o=['watching','completed','planned','dropped'],i=o.indexOf(s.status);s.status=o[(i+1)%o.length];if(s.status==='completed'){s.seasons.forEach(x=>x.watched=x.episodes)}else if(s.status==='planned'){s.seasons.forEach(x=>x.watched=0)}save();render()}
+else if(a==='delete'){series=series.filter(x=>x.id!==s.id);save();render()}};
+
+addBtn.addEventListener('click',addSeries);
+titleInput.addEventListener('keydown',e=>{if(e.key==='Enter')addSeries()});
+grid.addEventListener('click',handleClick);
+modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('active');editingId=null}});
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;installBanner.classList.add('show')});
+installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;installBanner.classList.remove('show')});
+window.addEventListener('appinstalled',()=>{installBanner.classList.remove('show')});
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+
+load();render();
+</script>
+</body>
+</html>
