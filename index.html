@@ -172,6 +172,7 @@ document.getElementById('exportBtn').addEventListener('click',()=>{const blob=ne
 document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;series=d;save();render()}catch(err){alert('Некорректный файл')}};r.readAsText(f);e.target.value=''});
 
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js')})}
 load();render();
 </script>
 </body>
