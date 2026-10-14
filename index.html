@@ -2,105 +2,87 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#7c3aed">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Сериалы">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>трекер сериалов</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#f5f5f7;font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;min-height:100vh;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));padding-bottom:max(1rem,env(safe-area-inset-bottom));color:#1a1a2e;overscroll-behavior:none}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f5f7;font-family:system-ui,sans-serif;display:flex;justify-content:center;min-height:100vh;padding:2rem 1rem;color:#1a1a2e}
 .app{max-width:1000px;width:100%}
-h1{font-size:1.6rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
-h1 span{background:#7c3aed;font-size:.8rem;padding:.15rem .6rem;border-radius:40px;color:#fff}
-.add-form{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;background:#fff;padding:.8rem;border-radius:14px;border:1px solid #e4e4eb}
-.add-form input{flex:1 1 160px;background:#f9f9fb;border:1px solid #e4e4eb;padding:.7rem 1rem;border-radius:10px;font-size:.9rem;outline:none;min-width:0}
+h1{font-size:1.9rem;font-weight:600;margin-bottom:1.5rem;display:flex;align-items:center;gap:.6rem}
+h1 span{background:#7c3aed;font-size:.85rem;padding:.2rem .7rem;border-radius:40px;color:#fff}
+.add-form{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:16px;border:1px solid #e4e4eb}
+.add-form input{flex:1 1 180px;background:#f9f9fb;border:1px solid #e4e4eb;padding:.7rem 1rem;border-radius:12px;font-size:.9rem;outline:none}
 .add-form input:focus{border-color:#7c3aed;background:#fff}
-.add-form button{background:#7c3aed;border:none;padding:.7rem 1.4rem;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;font-size:.9rem}
+.add-form button{background:#7c3aed;border:none;padding:.7rem 1.6rem;border-radius:12px;font-weight:600;color:#fff;cursor:pointer}
 .add-form button:hover{background:#6d28d9}
-  .btn-io{background:#f5f5f7 !important;color:#4a4a5a !important;border:1px solid #e4e4eb !important}
+.btn-io{background:#f5f5f7 !important;color:#4a4a5a !important;border:1px solid #e4e4eb !important}
 .btn-io:hover{background:#ececf1 !important}
-.add-form button:active{transform:scale(.97)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));padding-bottom:max(1rem,env(safe-area-inset-bottom))}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}
 .modal-overlay.active{display:flex}
-.modal{background:#fff;border-radius:14px;padding:1.2rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
-.modal h2{font-size:1.1rem;margin-bottom:1rem}
-.season-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;background:#f9f9fb;padding:.5rem .7rem;border-radius:10px;border:1px solid #e4e4eb}
-.season-row .season-label{font-size:.8rem;font-weight:600;min-width:65px;color:#4a4a5a}
-.season-row input{flex:1;background:#fff;border:1px solid #e4e4eb;padding:.5rem .7rem;border-radius:8px;font-size:.85rem;outline:none;min-width:0}
+.modal{background:#fff;border-radius:16px;padding:1.5rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:1.2rem;margin-bottom:1rem}
+.season-row{display:flex;gap:.6rem;align-items:center;margin-bottom:.6rem;background:#f9f9fb;padding:.6rem .8rem;border-radius:10px;border:1px solid #e4e4eb}
+.season-row .season-label{font-size:.85rem;font-weight:600;min-width:70px;color:#4a4a5a}
+.season-row input{flex:1;background:#fff;border:1px solid #e4e4eb;padding:.5rem .7rem;border-radius:8px;font-size:.85rem;outline:none}
 .season-row input:focus{border-color:#7c3aed}
-.season-row button{background:#fee2e2;border:none;border-radius:8px;padding:.4rem .65rem;font-size:.85rem;color:#b91c1c;cursor:pointer}
-.modal-actions{display:flex;gap:.5rem;margin-top:1rem;justify-content:flex-end}
-.modal-actions button{padding:.6rem 1.1rem;border-radius:10px;font-weight:600;font-size:.85rem;cursor:pointer;border:none}
+.season-row button{background:#fee2e2;border:none;border-radius:8px;padding:.4rem .7rem;font-size:.85rem;color:#b91c1c;cursor:pointer}
+.season-row button:hover{background:#fecaca}
+.modal-actions{display:flex;gap:.6rem;margin-top:1rem;justify-content:flex-end}
+.modal-actions button{padding:.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:.85rem;cursor:pointer;border:none}
 .btn-secondary{background:#f5f5f7;color:#4a4a5a;border:1px solid #e4e4eb !important}
+.btn-secondary:hover{background:#ececf1}
 .btn-primary{background:#7c3aed;color:#fff}
+.btn-primary:hover{background:#6d28d9}
 .btn-add-season{background:#ede9fe;color:#6d28d9;border:none;padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;margin-bottom:1rem}
-.stats{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
-.stat-card{background:#fff;padding:.5rem .9rem;border-radius:10px;border:1px solid #e4e4eb;display:flex;align-items:center;gap:.4rem}
-.stat-card .num{font-size:1rem;font-weight:700}
-.stat-card .label{font-size:.7rem;color:#8a8a9e;text-transform:uppercase}
+.btn-add-season:hover{background:#ddd6fe}
+.stats{display:flex;gap:.7rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat-card{background:#fff;padding:.6rem 1.1rem;border-radius:12px;border:1px solid #e4e4eb;display:flex;align-items:center;gap:.5rem}
+.stat-card .num{font-size:1.15rem;font-weight:700}
+.stat-card .label{font-size:.75rem;color:#8a8a9e;text-transform:uppercase}
 .series-grid{display:flex;flex-direction:column;gap:.5rem}
-.series-card{background:#fff;border:1px solid #e4e4eb;border-radius:12px;padding:.7rem .9rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
-.series-title{flex:2 1 160px;min-width:0;font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.series-title .badge{display:inline-block;padding:.1rem .5rem;border-radius:40px;font-size:.6rem;font-weight:600;text-transform:uppercase;margin-left:.4rem;vertical-align:middle}
+.series-card{background:#fff;border:1px solid #e4e4eb;border-radius:12px;padding:.7rem 1rem;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.series-card:hover{border-color:#c9c9d6}
+.series-title{flex:2 1 180px;min-width:0;font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.series-title:hover{color:#7c3aed}
+.series-title .badge{display:inline-block;padding:.15rem .6rem;border-radius:40px;font-size:.65rem;font-weight:600;text-transform:uppercase;margin-left:.5rem;vertical-align:middle}
 .badge.watching{background:#ede9fe;color:#6d28d9}
 .badge.completed{background:#d1fae5;color:#047857}
 .badge.planned{background:#e2e8f0;color:#64748b}
 .badge.dropped{background:#fee2e2;color:#b91c1c}
-.series-meta{flex:0 1 auto;font-size:.75rem;color:#8a8a9e;white-space:nowrap}
+.series-meta{flex:0 1 auto;font-size:.78rem;color:#8a8a9e;white-space:nowrap}
 .series-meta .ep{color:#7c3aed;font-weight:500}
-.progress-container{flex:1 1 120px;min-width:90px}
-.progress-bar-bg{background:#f0f0f5;height:5px;border-radius:10px;overflow:hidden;margin-bottom:.15rem}
+.progress-container{flex:1 1 130px;min-width:100px}
+.progress-bar-bg{background:#f0f0f5;height:5px;border-radius:10px;overflow:hidden;margin-bottom:.2rem}
 .progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:10px}
-.progress-text{font-size:.65rem;color:#8a8a9e;text-align:right}
+.progress-text{font-size:.7rem;color:#8a8a9e;text-align:right}
 .actions{display:flex;gap:.3rem;flex-shrink:0}
-.actions button{background:#f5f5f7;border:1px solid #e4e4eb;border-radius:8px;padding:.35rem .65rem;font-size:.72rem;color:#4a4a5a;cursor:pointer}
+.actions button{background:#f5f5f7;border:1px solid #e4e4eb;border-radius:8px;padding:.35rem .7rem;font-size:.75rem;color:#4a4a5a;cursor:pointer}
+.actions button:hover{background:#ececf1}
 .actions button.danger:hover{background:#fee2e2;color:#b91c1c}
-.empty-state{text-align:center;padding:3rem 1rem;color:#9a9aae;border:1px dashed #d4d4dc;border-radius:14px}
+.empty-state{text-align:center;padding:3rem 1rem;color:#9a9aae;border:1px dashed #d4d4dc;border-radius:16px}
 .empty-state small{display:block;margin-top:.4rem;font-size:.8rem}
-.seasons-panel{padding:.9rem;background:#fafafc;border-top:1px solid #e4e4eb;width:100%;border-radius:8px;margin-top:.4rem}
-.season-block{margin-bottom:.9rem}
+.seasons-panel{padding:1rem;background:#fafafc;border-top:1px solid #e4e4eb;width:100%;border-radius:8px;margin-top:.5rem}
+.season-block{margin-bottom:1rem}
 .season-block:last-child{margin-bottom:0}
-.season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
-.season-header .season-name{font-size:.8rem;font-weight:600;color:#4a4a5a}
-.season-header .season-progress{font-size:.72rem;color:#8a8a9e}
+.season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.season-header .season-name{font-size:.85rem;font-weight:600;color:#4a4a5a}
+.season-header .season-progress{font-size:.75rem;color:#8a8a9e}
 .season-header .season-progress .done{color:#047857;font-weight:600}
-.episodes-grid{display:flex;flex-wrap:wrap;gap:.3rem}
-.episode-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e4e4eb;background:#fff;font-size:.72rem;font-weight:500;color:#8a8a9e;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.episodes-grid{display:flex;flex-wrap:wrap;gap:.35rem}
+.episode-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e4e4eb;background:#fff;font-size:.75rem;font-weight:500;color:#8a8a9e;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.episode-btn:hover{border-color:#7c3aed;color:#7c3aed}
 .episode-btn.watched{background:#7c3aed;border-color:#7c3aed;color:#fff}
-.install-banner{background:#fff;border:1px solid #e4e4eb;border-radius:12px;padding:.8rem 1rem;margin-bottom:1rem;display:none;align-items:center;gap:.7rem;justify-content:space-between;flex-wrap:wrap}
-.install-banner.show{display:flex}
-.install-banner .txt{font-size:.85rem;color:#4a4a5a;flex:1 1 200px}
-.install-banner button{background:#7c3aed;border:none;padding:.55rem 1.1rem;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;font-size:.85rem}
-@media(max-width:700px){
-h1{font-size:1.4rem}
-.series-card{padding:.7rem}
-.series-title{flex:1 1 100%}
-.actions{width:100%;justify-content:flex-start}
-.progress-container{flex:1 1 100%}
-}
-  #loader{position:fixed;inset:0;background:#f5f5f7;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
-#loader.hide{opacity:0;pointer-events:none}
-#loader .spinner{width:48px;height:48px;border:4px solid #e4e4eb;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.episode-btn.watched:hover{background:#6d28d9}
+@media(max-width:700px){.series-card{padding:.8rem}.series-title{flex:1 1 100%}.actions{width:100%;justify-content:flex-start}.progress-container{flex:1 1 100%}}
 </style>
 </head>
-  <div id="loader"><div class="spinner"></div></div>
 <body>
 <div class="app">
 <h1>📺 трекер сериалов <span id="totalCount">0</span></h1>
-<div class="install-banner" id="installBanner">
-<div class="txt">Установите приложение на устройство для быстрого доступа</div>
-<button id="installBtn">Установить</button>
-</div>
 <div class="add-form">
 <input id="titleInput" placeholder="Название сериала" autocomplete="off">
 <button id="addBtn">+ добавить</button>
-  <button id="exportBtn" class="btn-io">⬇ экспорт</button>
+<button id="exportBtn" class="btn-io">⬇ экспорт</button>
 <button id="importBtn" class="btn-io">⬆ импорт</button>
 <input type="file" id="importFile" accept=".json,application/json" style="display:none">
 </div>
@@ -126,11 +108,10 @@ h1{font-size:1.4rem}
 </div>
 
 <script>
-const KEY='series_tracker_v6',grid=document.getElementById('seriesGrid'),titleInput=document.getElementById('titleInput'),addBtn=document.getElementById('addBtn'),totalCount=document.getElementById('totalCount'),statWatching=document.getElementById('statWatching'),statCompleted=document.getElementById('statCompleted'),statPlanned=document.getElementById('statPlanned'),statDropped=document.getElementById('statDropped');
+const KEY='series_tracker_v4',grid=document.getElementById('seriesGrid'),titleInput=document.getElementById('titleInput'),addBtn=document.getElementById('addBtn'),totalCount=document.getElementById('totalCount'),statWatching=document.getElementById('statWatching'),statCompleted=document.getElementById('statCompleted'),statPlanned=document.getElementById('statPlanned'),statDropped=document.getElementById('statDropped');
 const modal=document.getElementById('seasonsModal'),modalTitle=document.getElementById('modalTitle'),seasonsList=document.getElementById('seasonsList'),addSeasonBtn=document.getElementById('addSeasonBtn'),cancelSeasonsBtn=document.getElementById('cancelSeasonsBtn'),saveSeasonsBtn=document.getElementById('saveSeasonsBtn');
-const installBanner=document.getElementById('installBanner'),installBtn=document.getElementById('installBtn');
 const STATUSES={watching:{label:'смотрю',class:'watching'},completed:{label:'завершён',class:'completed'},planned:{label:'в планах',class:'planned'},dropped:{label:'брошен',class:'dropped'}};
-let series=[],expandedId=null,editingId=null,tempSeasons=[],deferredPrompt=null;
+let series=[],expandedId=null,editingId=null,tempSeasons=[];
 
 const load=()=>{try{const r=localStorage.getItem(KEY);series=r?JSON.parse(r):[{id:'1',title:'Во все тяжкие',seasons:[{episodes:7,watched:7},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:16,watched:16}],status:'completed'},{id:'2',title:'Очень странные дела',seasons:[{episodes:8,watched:8},{episodes:9,watched:9},{episodes:8,watched:8},{episodes:9,watched:3}],status:'watching'},{id:'3',title:'Дом Дракона',seasons:[{episodes:10,watched:0},{episodes:8,watched:0}],status:'planned'}]}catch(e){series=[]}};
 const save=()=>localStorage.setItem(KEY,JSON.stringify(series));
@@ -186,20 +167,11 @@ titleInput.addEventListener('keydown',e=>{if(e.key==='Enter')addSeries()});
 grid.addEventListener('click',handleClick);
 modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('active');editingId=null}});
 
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;installBanner.classList.add('show')});
-installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;installBanner.classList.remove('show')});
-window.addEventListener('appinstalled',()=>{installBanner.classList.remove('show')});
+document.getElementById('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(series,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='series-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;series=d;save();render()}catch(err){alert('Некорректный файл')}};r.readAsText(f);e.target.value=''});
 
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
-
-  document.getElementById('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(series,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='series-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
-  document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
-  document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;series=d;save();render()}catch(err){alert('Некорректный файл')}};r.readAsText(f);e.target.value=''});
-  
-setTimeout(()=>{const l=document.getElementById('loader');l.classList.add('hide');setTimeout(()=>l.remove(),500)},1000);
-  
-  load();
-  render();
+load();render();
 </script>
 </body>
 </html>
