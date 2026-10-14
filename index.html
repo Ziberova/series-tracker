@@ -22,6 +22,8 @@ h1 span{background:#7c3aed;font-size:.8rem;padding:.15rem .6rem;border-radius:40
 .add-form input:focus{border-color:#7c3aed;background:#fff}
 .add-form button{background:#7c3aed;border:none;padding:.7rem 1.4rem;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;font-size:.9rem}
 .add-form button:hover{background:#6d28d9}
+  .btn-io{background:#f5f5f7 !important;color:#4a4a5a !important;border:1px solid #e4e4eb !important}
+.btn-io:hover{background:#ececf1 !important}
 .add-form button:active{transform:scale(.97)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;padding-top:max(1rem,env(safe-area-inset-top));padding-bottom:max(1rem,env(safe-area-inset-bottom))}
 .modal-overlay.active{display:flex}
@@ -93,6 +95,9 @@ h1{font-size:1.4rem}
 <div class="add-form">
 <input id="titleInput" placeholder="Название сериала" autocomplete="off">
 <button id="addBtn">+ добавить</button>
+  <button id="exportBtn" class="btn-io">⬇ экспорт</button>
+<button id="importBtn" class="btn-io">⬆ импорт</button>
+<input type="file" id="importFile" accept=".json,application/json" style="display:none">
 </div>
 <div class="stats">
 <div class="stat-card"><span class="num" id="statWatching">0</span><span class="label">смотрю</span></div>
@@ -182,7 +187,12 @@ window.addEventListener('appinstalled',()=>{installBanner.classList.remove('show
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 
-load();render();
+  document.getElementById('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(series,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='series-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
+  document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;series=d;save();render()}catch(err){alert('Некорректный файл')}};r.readAsText(f);e.target.value=''});
+
+  load();
+  render();
 </script>
 </body>
 </html>
