@@ -114,7 +114,7 @@ const modal=document.getElementById('seasonsModal'),modalTitle=document.getEleme
 const STATUSES={watching:{label:'смотрю',class:'watching'},completed:{label:'завершён',class:'completed'},planned:{label:'в планах',class:'planned'},dropped:{label:'брошен',class:'dropped'}};
 let series=[],expandedId=null,editingId=null,tempSeasons=[];
 
-const load=()=>{try{const r=localStorage.getItem(KEY);series=r?JSON.parse(r):[{id:'1',title:'Во все тяжкие',seasons:[{episodes:7,watched:7},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:13,watched:13},{episodes:16,watched:16}],status:'completed'},{id:'2',title:'Очень странные дела',seasons:[{episodes:8,watched:8},{episodes:9,watched:9},{episodes:8,watched:8},{episodes:9,watched:3}],status:'watching'},{id:'3',title:'Дом Дракона',seasons:[{episodes:10,watched:0},{episodes:8,watched:0}],status:'planned'}]}catch(e){series=[]}};
+const load=()=>{try{const r=localStorage.getItem(KEY);series=r?JSON.parse(r):[]}catch(e){series=[]}};
 const save=()=>localStorage.setItem(KEY,JSON.stringify(series));
 const genId=()=>Date.now()+'-'+Math.random().toString(36).slice(2,8);
 const escapeHtml=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
