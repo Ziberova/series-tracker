@@ -1,6 +1,7 @@
 {
   "name": "Трекер сериалов",
   "short_name": "Сериалы",
+  "description": "Отслеживание просмотренных сериалов и фильмов",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
