@@ -68,10 +68,8 @@ h1 .hours{background:#d1fae5;color:#047857}
 .season-header .season-progress{font-size:.75rem;color:#8a8a9e}
 .season-header .season-progress .done{color:#047857;font-weight:600}
 .episodes-grid{display:flex;flex-wrap:wrap;gap:.35rem}
-.episode-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e4e4eb;background:#fff;font-size:.75rem;font-weight:500;color:#8a8a9e;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;touch-action:manipulation}
+.episode-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e4e4eb;background:#fff;font-size:.75rem;font-weight:500;color:#8a8a9e;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .episode-btn.watched{background:#7c3aed;border-color:#7c3aed;color:#fff}
-.episode-btn.overridden::after{content:'';position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f59e0b}
-.episode-btn.watched.overridden::after{background:#fbbf24}
 @media(max-width:700px){.series-card{padding:.8rem}.series-title{flex:1 1 100%}.actions{width:100%;justify-content:flex-start}.progress-container{flex:1 1 100%}.add-form input#minutesInput{flex:1 1 100px}}
 </style>
 </head>
@@ -94,11 +92,10 @@ h1 .hours{background:#d1fae5;color:#047857}
 </div>
 <div class="series-grid" id="seriesGrid"></div>
 </div>
-
 <div class="modal-overlay" id="seasonsModal">
 <div class="modal">
 <h2 id="modalTitle">Настройка сезонов</h2>
-<div class="modal-hint">Слева — число серий, справа — дефолтная длина серии в минутах. Потом долгий тап / правый клик по серии, чтобы задать ей свою длину.</div>
+<div class="modal-hint">Слева — число серий, справа — длина серии в минутах (если пусто — берётся длина сериала).</div>
 <div id="seasonsList"></div>
 <button class="btn-add-season" id="addSeasonBtn">+ добавить сезон</button>
 <div class="modal-actions">
@@ -107,56 +104,44 @@ h1 .hours{background:#d1fae5;color:#047857}
 </div>
 </div>
 </div>
-
 <script>
 const KEY='series_tracker_v4',grid=document.getElementById('seriesGrid'),titleInput=document.getElementById('titleInput'),minutesInput=document.getElementById('minutesInput'),addBtn=document.getElementById('addBtn'),totalCount=document.getElementById('totalCount'),totalHours=document.getElementById('totalHours'),statWatching=document.getElementById('statWatching'),statCompleted=document.getElementById('statCompleted'),statPlanned=document.getElementById('statPlanned'),statDropped=document.getElementById('statDropped');
 const modal=document.getElementById('seasonsModal'),modalTitle=document.getElementById('modalTitle'),seasonsList=document.getElementById('seasonsList'),addSeasonBtn=document.getElementById('addSeasonBtn'),cancelSeasonsBtn=document.getElementById('cancelSeasonsBtn'),saveSeasonsBtn=document.getElementById('saveSeasonsBtn');
 const STATUSES={watching:{label:'смотрю',class:'watching'},completed:{label:'завершён',class:'completed'},planned:{label:'в планах',class:'planned'},dropped:{label:'брошен',class:'dropped'}};
-let series=[],expandedId=null,editingId=null,tempSeasons=[],pressTimer=null,skipNextClick=false;
-
+let series=[],expandedId=null,editingId=null,tempSeasons=[];
 const load=()=>{try{const r=localStorage.getItem(KEY);series=r?JSON.parse(r):[]}catch(e){series=[]}};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(series));
 const genId=()=>Date.now()+'-'+Math.random().toString(36).slice(2,8);
 const escapeHtml=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
 const totalEp=s=>s.seasons.reduce((a,x)=>a+x.episodes,0);
 const totalWatched=s=>s.seasons.reduce((a,x)=>a+x.watched,0);
 const defaultMin=(s,sea)=>sea.defaultMinutes||s.minutes||45;
-const epMin=(s,sea,ep)=>(sea.overrides&&sea.overrides[ep])||defaultMin(s,sea);
-const seriesMinutes=s=>{let total=0;s.seasons.forEach(sea=>{for(let i=1;i<=sea.watched;i++)total+=epMin(s,sea,i)});return total};
+const seriesMinutes=s=>{let t=0;s.seasons.forEach(sea=>{t+=sea.watched*defaultMin(s,sea)});return t};
 const autoStatus=s=>{const t=totalEp(s),w=totalWatched(s);if(w>=t&&t>0)return'completed';if(w>0)return'watching';return s.status==='dropped'?'dropped':'planned'};
 const formatHours=m=>{if(m<60)return m+' мин';const h=m/60;if(h<24)return Math.round(h*10)/10+' ч';const d=Math.floor(h/24);return d+' сут '+Math.round(h%24)+' ч'};
-
 const updateStats=()=>{const c={watching:0,completed:0,planned:0,dropped:0};let totalMin=0;series.forEach(s=>{const st=autoStatus(s);if(c[st]!==undefined)c[st]++;totalMin+=seriesMinutes(s)});statWatching.textContent=c.watching;statCompleted.textContent=c.completed;statPlanned.textContent=c.planned;statDropped.textContent=c.dropped;totalCount.textContent=series.length;totalHours.textContent='~'+formatHours(totalMin)};
-
 const renderSeasons=(s)=>{
 let html='';
 s.seasons.forEach((sea,si)=>{
 let eps='';
-for(let i=1;i<=sea.episodes;i++){const over=sea.overrides&&sea.overrides[i];eps+=`<button class="episode-btn ${i<=sea.watched?'watched':''} ${over?'overridden':''}" data-season="${si}" data-ep="${i}" title="${over?over+' мин':defaultMin(s,sea)+' мин'}">${i}</button>`}
+for(let i=1;i<=sea.episodes;i++){eps+=`<button class="episode-btn ${i<=sea.watched?'watched':''}" data-season="${si}" data-ep="${i}">${i}</button>`}
 html+=`<div class="season-block"><div class="season-header"><span class="season-name">Сезон ${si+1}</span><span class="season-progress"><span class="done">${sea.watched}</span> / ${sea.episodes}</span></div><div class="episodes-grid">${eps}</div></div>`});
 return html};
-
 const render=()=>{
 if(!series.length){grid.innerHTML='<div class="empty-state">нет сериалов<small>добавь первый сериал выше</small></div>';updateStats();return}
 grid.innerHTML=series.map(s=>{
 const total=totalEp(s),watched=totalWatched(s),percent=total?Math.round(watched/total*100):0,st=STATUSES[autoStatus(s)]||STATUSES.planned,sw=s.seasons.length===1?'сезон':s.seasons.length<5?'сезона':'сезонов',exp=expandedId===s.id;
 return `<div class="series-card" data-id="${s.id}"><div class="series-title" data-action="expand">${escapeHtml(s.title)}<span class="badge ${st.class}">${st.label}</span></div><div class="series-meta">${s.seasons.length} ${sw} · <span class="ep">${total} эп.</span> · ~${s.minutes||45} мин</div><div class="progress-container"><div class="progress-bar-bg"><div class="progress-fill" style="width:${percent}%"></div></div><div class="progress-text">${watched}/${total} · ${percent}%</div></div><div class="actions"><button data-action="config">сезоны</button><button data-action="status">статус</button><button class="danger" data-action="delete">✕</button></div>${exp?`<div class="seasons-panel">${renderSeasons(s)}</div>`:''}</div>`}).join('');
 updateStats()};
-
-const openModal=(id)=>{editingId=id;const s=series.find(x=>x.id===id);modalTitle.textContent=`Сезоны: ${s.title}`;tempSeasons=s.seasons.map(x=>({episodes:x.episodes,watched:x.watched,defaultMinutes:x.defaultMinutes,overrides:x.overrides}));renderModalSeasons();modal.classList.add('active')};
+const openModal=(id)=>{editingId=id;const s=series.find(x=>x.id===id);modalTitle.textContent=`Сезоны: ${s.title}`;tempSeasons=s.seasons.map(x=>({episodes:x.episodes,watched:x.watched,defaultMinutes:x.defaultMinutes}));renderModalSeasons();modal.classList.add('active')};
 const renderModalSeasons=()=>{seasonsList.innerHTML=tempSeasons.map((sea,i)=>`<div class="season-row"><span class="season-label">Сезон ${i+1}</span><input type="number" min="1" value="${sea.episodes}" data-idx="${i}" class="season-ep-input" placeholder="Серий"><input type="number" min="1" value="${sea.defaultMinutes||''}" data-idx="${i}" class="season-min-input" placeholder="мин/сер"><button data-idx="${i}" class="remove-season">✕</button></div>`).join('')};
-
-addSeasonBtn.addEventListener('click',()=>{tempSeasons.push({episodes:10,watched:0,defaultMinutes:undefined,overrides:undefined});renderModalSeasons()});
+addSeasonBtn.addEventListener('click',()=>{tempSeasons.push({episodes:10,watched:0,defaultMinutes:undefined});renderModalSeasons()});
 seasonsList.addEventListener('input',e=>{if(e.target.classList.contains('season-ep-input')){const i=+e.target.dataset.idx;const v=Math.max(1,parseInt(e.target.value)||1);tempSeasons[i].episodes=v;if(tempSeasons[i].watched>v)tempSeasons[i].watched=v}else if(e.target.classList.contains('season-min-input')){const i=+e.target.dataset.idx;const v=parseInt(e.target.value);tempSeasons[i].defaultMinutes=v>0?v:undefined}});
 seasonsList.addEventListener('click',e=>{if(e.target.classList.contains('remove-season')){if(tempSeasons.length<=1)return;tempSeasons.splice(+e.target.dataset.idx,1);renderModalSeasons()}});
 cancelSeasonsBtn.addEventListener('click',()=>{modal.classList.remove('active');editingId=null});
-saveSeasonsBtn.addEventListener('click',()=>{const s=series.find(x=>x.id===editingId);if(!s)return;s.seasons=tempSeasons.map(x=>{let ov=x.overrides;if(ov){const clean={};for(const k in ov)if(+k<=x.episodes)clean[k]=ov[k];ov=Object.keys(clean).length?clean:undefined}return{episodes:x.episodes,watched:Math.min(x.watched,x.episodes),defaultMinutes:x.defaultMinutes,overrides:ov}});save();modal.classList.remove('active');editingId=null;render()});
-
+saveSeasonsBtn.addEventListener('click',()=>{const s=series.find(x=>x.id===editingId);if(!s)return;s.seasons=tempSeasons.map(x=>({episodes:x.episodes,watched:Math.min(x.watched,x.episodes),defaultMinutes:x.defaultMinutes}));save();modal.classList.remove('active');editingId=null;render()});
 const addSeries=()=>{const t=titleInput.value.trim();if(!t)return;const id=genId();const m=Math.max(1,parseInt(minutesInput.value)||45);series.push({id,title:t,minutes:m,seasons:[{episodes:10,watched:0}],status:'planned'});titleInput.value='';save();render();openModal(id)};
-
-const askLength=(btn)=>{const card=btn.closest('.series-card');const s=series.find(x=>x.id===card.dataset.id);if(!s)return;const si=+btn.dataset.season,ep=+btn.dataset.ep;const sea=s.seasons[si];const dflt=defaultMin(s,sea);const cur=(sea.overrides&&sea.overrides[ep])||dflt;const v=prompt(`Длина серии ${ep} (сезон ${si+1}) в минутах.\nОставь пусто — вернётся дефолт ${dflt} мин.`,cur);if(v===null)return;if(v.trim()===''){if(sea.overrides){delete sea.overrides[ep];if(!Object.keys(sea.overrides).length)delete sea.overrides}}else{const n=parseInt(v);if(n>0){if(!sea.overrides)sea.overrides={};sea.overrides[ep]=n}}save();render()};
-
 const handleClick=e=>{
-if(skipNextClick){skipNextClick=false;return}
 const epBtn=e.target.closest('.episode-btn');
 if(epBtn){const card=epBtn.closest('.series-card');const s=series.find(x=>x.id===card.dataset.id);const si=+epBtn.dataset.season,ep=+epBtn.dataset.ep;const sea=s.seasons[si];if(ep===sea.watched+1)sea.watched=ep;else if(ep<=sea.watched)sea.watched=ep-1;else sea.watched=ep;s.status=autoStatus(s);save();render();return}
 const title=e.target.closest('.series-title');
@@ -168,22 +153,14 @@ const a=btn.dataset.action;
 if(a==='config'){openModal(s.id)}
 else if(a==='status'){const o=['watching','completed','planned','dropped'],i=o.indexOf(s.status);s.status=o[(i+1)%o.length];if(s.status==='completed'){s.seasons.forEach(x=>x.watched=x.episodes)}else if(s.status==='planned'){s.seasons.forEach(x=>x.watched=0)}save();render()}
 else if(a==='delete'){series=series.filter(x=>x.id!==s.id);save();render()}};
-
-grid.addEventListener('touchstart',e=>{const btn=e.target.closest('.episode-btn');if(!btn)return;pressTimer=setTimeout(()=>{skipNextClick=true;askLength(btn)},500)},{passive:true});
-grid.addEventListener('touchend',()=>clearTimeout(pressTimer));
-grid.addEventListener('touchmove',()=>clearTimeout(pressTimer));
-grid.addEventListener('touchcancel',()=>clearTimeout(pressTimer));
-grid.addEventListener('contextmenu',e=>{const btn=e.target.closest('.episode-btn');if(!btn)return;e.preventDefault();askLength(btn)});
 addBtn.addEventListener('click',addSeries);
 titleInput.addEventListener('keydown',e=>{if(e.key==='Enter')addSeries()});
 minutesInput.addEventListener('keydown',e=>{if(e.key==='Enter')addSeries()});
 grid.addEventListener('click',handleClick);
 modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('active');editingId=null}});
-
 document.getElementById('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(series,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='series-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
 document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;series=d;save();render()}catch(err){alert('Некорректный файл')}};r.readAsText(f);e.target.value=''});
-
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js')})}
 load();render();
 </script>
